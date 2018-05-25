@@ -1,0 +1,16 @@
+subjectNo,Exclude,ExcludeReason,Outlier,OutlierReason,DROP
+1007,NO,NO,YES,LOW TSPAN,YES
+1305,YES,Self Reported Hearing Loss,NO,NONE,YES
+509,YES,Self Reported Hearing Loss,NO,NONE,YES
+519,NO,NO,YES,LOW RAVENS,YES
+532,NO,NO,YES,LOW RAVENS,YES
+537,YES,Self Reported Hearing Loss,NO,NONE,YES
+544,YES,Self Reported Hearing Loss,NO,NONE,YES
+545,YES,Self Reported Hearing Loss,NO,NONE,YES
+717,YES,Self Reported Hearing Loss,NO,NONE,YES
+719,YES,Self Reported Hearing Loss,NO,NONE,YES
+907,YES,Self Reported Hearing Loss,NO,NONE,YES
+953,YES,YES,NO,NONE,YES
+961,NO,NO,YES,"LOW RAVENS, LOW OSPAN",YES
+970,NO,NO,YES,LOW RAVENS,YES
+980,NO,NO,YES,LOW TSPAN,YES

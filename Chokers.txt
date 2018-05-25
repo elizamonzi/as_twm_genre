@@ -1,0 +1,21 @@
+# List of Files that Choke the script and how I fixed them
+
+## Gold MSI 
+
+* 719 -- Missing like the rest of the data file
+
+## Number Series
+
+Says these are not real eprime files
+
+* Two 977?
+* 944
+* 976
+
+## Ravens
+
+* 935, 944, 976 -- All not recognized as eprime files
+
+## OSPAN
+
+* See problem file

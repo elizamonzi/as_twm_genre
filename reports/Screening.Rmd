@@ -1,0 +1,170 @@
+---
+title: "Data Screening ICMPC15"
+author: "David John Baker"
+date: "May 16, 2018"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+Data Screening Report
+
+## Boring Cleaning Stuff
+
+There's a whole bunch of stuff you can't see in the markdown for cleaning here... 
+
+```{r, include=FALSE}
+library(data.table)
+library(ggplot2)
+library(psych)
+library(stringr)
+#--------------------------------------------------
+# Import Data
+master <- fread("../data/aggregated_data/Master-Data_ICMPC18_May14.csv")
+# First row is not real, drop it for now
+master <- master[-1,]
+
+#--------------------------------------------------
+# Get Demographics
+str(master)
+names(master)
+
+master[, ravenage := as.numeric(ravenAge)]
+
+master$age
+
+# Fix free responders 
+master$age[170] <- 19
+# Fix these below
+master[age=="",.(subjectNo, ravenAge)]
+
+master[, goldage := as.numeric(age)]
+
+# Young people 
+master[ goldage < 18, .(subjectNo,goldage)]
+
+# Update Gold Age with Real Age from Ravens 
+master[subjectNo == 541]$goldage <- master[subjectNo == 541]$ravenage
+master[subjectNo == 947]$goldage <- master[subjectNo == 947]$ravenage
+master[subjectNo == 950]$goldage <- master[subjectNo == 950]$ravenage
+
+master[subjectNo == 545]$goldage <- master[subjectNo == 545]$ravenage
+master[subjectNo == 719]$goldage <- master[subjectNo == 719]$ravenage
+master[subjectNo == 959]$goldage <- master[subjectNo == 959]$ravenage
+master[subjectNo == 965]$goldage <- master[subjectNo == 965]$ravenage
+
+# DROP 50 YEAR OLD NON MUSICIAN
+
+master <- master[subjectNo != 953]
+
+# AGE INFORMATION
+describe(master[,.(goldage)])
+
+#--------------------------------------------------
+# Clean gender
+
+master[ravenSex == "", .(subjectNo, ravenSex, gender)]
+
+master[subjectNo == 507]$ravenSex <- master[subjectNo == 507]$gender 
+master[subjectNo == 556]$ravenSex <- master[subjectNo == 556]$gender
+master[subjectNo == 935]$ravenSex <- master[subjectNo == 935]$gender
+master[subjectNo == 944]$ravenSex <- master[subjectNo == 944]$gender
+master[subjectNo == 976]$ravenSex <- master[subjectNo == 976]$gender
+master[subjectNo == 1026]$ravenSex <- master[subjectNo == 1026]$gender
+master[subjectNo == 1027]$ravenSex <- master[subjectNo == 1027]$gender
+
+master$ravenSex <- str_to_lower(master$ravenSex)
+table(master$ravenSex)
+
+#======================================================================================================
+# Begin Screening 
+## First drop prolematic cases 
+master[!complete.cases(master)][,.(subjectNo)]
+
+# 545, 719 , missing Goldsmiths Self Report  
+master <- master[subjectNo != 545 | subjectNo != 719]
+
+# Remove Doublers 
+master <- master[Doubler == "SINGLER"]
+
+# People with Medication and Hearing Loss
+master[meds == 0 | ravenHearing == "Yes" , .(subjectNo, meds, ravenHearing)]
+
+# Create Listwise Dataset, and Not 
+```
+
+## Cognitive Variable Checking 
+
+```{r}
+# Check for Proper Correlations (Unsworth, 2009)
+# Need sig positive correaltion between SymSpan, Ospan, TSpan -- All measuring WMC 
+
+wmc <- master[, .(TonePartial, 
+                  MeanOspanPartialScore, 
+                  MeanSspanPartialScore)]
+pairs.panels(wmc, lm = TRUE, stars = TRUE)
+
+# And each task should negatively correlate with own processing task 
+negatives <- master[, .(TonePartial, toneaccError,
+                        MeanOspanPartialScore, OspanAccError,
+                        MeanSspanPartialScore, symmAccError )]
+
+pairs.panels(negatives, lm = TRUE, stars = TRUE)
+#--------------------------------------------------
+# Above Correlations Suggest Creating new WMC composite
+
+master[, wmc := ((scale(TonePartial)+scale(MeanOspanPartialScore)+scale(MeanSspanPartialScore))/3)]
+#--------------------------------------------------
+# Check that Gf are both measuring the same 
+# Create New Gf Variables
+
+master[, AdjustedNumberSeries := NumberTotalScore/NumberAttempted]
+master[, RavensAvg := RavensTotaljv/3]
+gfscores <- master[, .(RavensBlock1, RavensBlock2, RavensBlock3,RavensAvg, NumberAttempted, NumberTotalScore, NumberTotalTime, AdjustedNumberSeries)]
+
+pairs.panels(gfscores, lm = TRUE, stars = TRUE)
+
+#--------------------------------------------------
+# Above Correlations Suggest Creating new GF composite
+
+master[, gf := (scale(AdjustedNumberSeries) + scale(RavensAvg)/2)]
+
+gfscores <- master[, .(gf,RavensBlock1, RavensBlock2, RavensBlock3,RavensAvg, NumberAttempted, NumberTotalScore, NumberTotalTime, AdjustedNumberSeries)]
+
+pairs.panels(gfscores, lm = TRUE, stars = TRUE)
+#--------------------------------------------------
+# Look at composites and their original scores
+
+compositeComparer <- master[, .(gf, wmc, RavensAvg, AdjustedNumberSeries, TonePartial, MeanOspanPartialScore, MeanSspanPartialScore)]
+
+pairs.panels(compositeComparer, lm = TRUE, stars = TRUE)
+
+```
+
+
+## Descriptives and Reliability (Eventually)
+```{r}
+#======================================================================================================
+# Create Descriptives and Reliability Table Here
+
+# Coming to Repo near you!!!!
+```
+
+## Variables
+
+Let me know if people want other variables for the analysis!
+
+```{r}
+#======================================================================================================
+# Write out Dataset for Analysis 
+
+AnalysisData <- master[, .(gf, wmc, RavensAvg, AdjustedNumberSeries,subjectNo, ravenSex, goldage, 
+                           BeatPerception, MelodicMemory, GENERAL, ACTIVE,PERCEPTUAL,MUSICAL, SINGING, EMOTIONS,
+                           familyIncome, highestFather, highestMother,
+                           RavensBlock1, RavensBlock2, RavensBlock3,
+                           NumberAttempted, NumberTotalScore, NumberTotalTime,
+                           toneaccError,ToneSpeedErr,TonePartial, TonePartialB1, TonePartialB2, TonePartialB3,
+                           OspanAccError, OspanSpeedError,MeanOspanPartialScore, MeanOspanPartialScoreBlock1, MeanOspanPartialScoreBlock2, MeanOspanPartialScoreBlock3,
+                           symmAccError, SymmSpeedError,MeanSspanPartialScore, MeanSspanPartialScoreBlock1, MeanOspanPartialScoreBlock2, MeanOspanPartialScoreBlock3)]
+
+```

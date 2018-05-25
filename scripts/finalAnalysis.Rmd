@@ -1,0 +1,30 @@
+---
+title: "GMSI FLUID WMC Analysis"
+author: "David John Baker"
+date: "April 20, 2018"
+output: html_document
+---
+
+This markdown document has analyses used for ICMPC 2018 Paper.
+Currently this document only has the outline of the analyses.
+
+## Aims of Paper
+
+The aim of this paper is to share findings from a large study investigating how different factors of musical sophistication, as measured by the Goldsmiths Musical Sophistication Index (Gold-MSI), relate to measures of working memory, general fluid intelligence, and genre preference as measured by the Short Test of Musical Preferences (Rentfrow & Gosling, 2003).
+
+> we plan to asses the degree to which certain cognitive process may underlie the objective and subjective measures of the Gold-MSI.
+
+## Analyses 
+
+### Descriptive Analyses 
+
+### Mediation Analyese
+
+Either stepwise multiple regression or mediation level analyses with WMC + Gf Moderate/Mediate Objective.
+
+## Discussion
+
+* Do measures of WMC and Gf contribute to variance in objective or subjective?
+* Why or why not?
+* How does genre play a role?
+* What are the big claims of this study? 
