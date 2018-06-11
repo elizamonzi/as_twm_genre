@@ -89,13 +89,23 @@ setnames(stratPlotData,"Source","Group")
 stratPlotData[Group == "Non-Musical"]$Group <- "Non Musician"
 stratPlotData[Group == "Musical"]$Group <- "Musician"
 
-
+tiff('test.tiff', units="in", width = 5, height = 5, res = 300)
 ggplot(stratPlotData[Strategy != "No Response Available"], 
        aes(x = Strategy, y = PercentResponse)) +
   #      scale_x_discrete(limit = positions) +
-  geom_bar(aes(fill=Group),position = "dodge",stat = "identity") +
-  labs(title = "Tone Strategies Used by Musicians and Non-Musicians", x = "Strategy", y = "Percent Response")
-
+  geom_bar(aes(fill=Group), position = "dodge",stat = "identity") + 
+  theme_bw() + scale_fill_grey(start = .1, end = .7) + 
+  theme(legend.position = c(.8,.85), panel.grid.major = element_blank(),
+        legend.text = element_text(size = 20), legend.title = element_text(size = 20),
+        panel.grid.minor = element_blank(), panel.background = element_blank(),
+        axis.line = element_line(colour = "black"), axis.text.y = element_text(size = 20),
+        axis.title = element_text(size = 20),
+        axis.text.x = element_text(angle = 60, hjust = 1, size = 20)) +
+  labs(title = "Strategies Employed by Musicians and Non-Musicians", 
+       x = "Strategy", y = "Percentage") +
+  theme(plot.title = element_text(hjust = 0.5, size = 20))
+ggsave("plotplot.jpg")
+dev.off()
 #----------------------------------------------
 # 
 
@@ -170,20 +180,30 @@ model.1 <- lm(TonePartial ~ GENERAL, data = asData)
 model.2 <- lm(TonePartial ~ GENERAL + CompositeAural, data = asData)
 model.3 <- lm(TonePartial ~ GENERAL + CompositeAural + MeanSspanPartialScore, data = asData)
 
+apa.reg.table(model.1, filename = "TableModel1.doc", table.number = 2)
+apa.reg.table(model.2, filename = "TableModel2.doc", table.number = 3)
+apa.reg.table(model.3, filename = "TableModel3.doc", table.number = 4)
+
+apa.reg.table(model.1, model.2, filename = "TableModels1_2.doc", table.number = 2)
+
+anova(model.1, model.2)
+anova(model.2, model.3)
+
 summary(model.1 )
 summary(model.2)
 summary(model.3)
 
 apaTables::apa.reg.table(model.1)
 
-plot(model.2)
+plot(model.1)
+
 
 #----------------------------------
 # Predict AS Grades from ToneSpan Score
 
-pairs.panels(asData[Source.x == "Musician", .(TonePartial, CompositeAural, CompositeGrade)], lm = TRUE, stars = TRUE)
+pairs.panels(asData[Source.x == "Musician", .(TonePartial, CompositeAural)], lm = TRUE, stars = TRUE)
 
-
+pairs.panels(asData[, .(TonePartial, CompositeAural)], lm = TRUE, stars = TRUE)
 
 #-----------------------------------
 # Exploratory Part 
@@ -219,6 +239,43 @@ pairs.panels(asData[Source.x == "Musician", .(classical,
                         heavyMetal, 
                         SoundtracksThemeSongs, 
                         CompositeAural)], lm = TRUE, stars = TRUE)
+
+pairs.panels(asData[, .(classical, 
+                                              blues, 
+                                              country, 
+                                              dancElectronica, 
+                                              folk,
+                                              rapHipHop, 
+                                              soulFunk, 
+                       
+                                              TonePartial)], lm = TRUE, stars = TRUE)
+
+pairs.panels(asData[, .( 
+                        soulFunk, 
+                        relgious, 
+                        alternative, 
+                        jazz, 
+                        rock, 
+                        pop, 
+                        heavyMetal, 
+                        SoundtracksThemeSongs, 
+                        TonePartial)], lm = TRUE, stars = TRUE)
+
+apa.cor.table(asData[, .(classical,
+                         blues,
+                         country, 
+                         dancElectronica, 
+                         folk,
+                         rapHipHop, 
+                         soulFunk, 
+                         relgious, 
+                         alternative, 
+                         jazz, 
+                         rock, 
+                         pop, 
+                         heavyMetal, 
+                         SoundtracksThemeSongs, 
+                         TonePartial)], filename = "CorrTable.doc", table.number = 3)
 
 ggplot(asData[Source.x == "Musician"], aes(x = CompositeAural, y = heavyMetal, size = GENERAL)) + 
   geom_point() + geom_jitter() + geom_smooth(method = "lm")
